@@ -1,6 +1,6 @@
 {
   "name": "git-public-url",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Obtain the public URL to a commit or file of a local repo",
   "dependencies": {
     "async": "^2.0.0-rc.5",
