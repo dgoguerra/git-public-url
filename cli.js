@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 var minimist = require('minimist'),
     publicUrl = require('./index.js');
 
