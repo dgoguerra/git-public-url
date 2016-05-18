@@ -1,0 +1,37 @@
+{
+  "name": "git-public-url",
+  "version": "0.1.0",
+  "description": "Obtain the public URL to a commit or file of a local repo",
+  "dependencies": {
+    "async": "^2.0.0-rc.5",
+    "minimist": "^1.2.0",
+    "lodash": "^4.12.0",
+    "parse-repo": "^1.0.1"
+  },
+  "devDependencies": {
+    "tape": "^4.5.1"
+  },
+  "scripts": {
+    "test": "node test.js"
+  },
+  "bin": {
+    "git-public-url": "cli.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dgoguerra/git-public-url.git"
+  },
+  "keywords": [
+    "git",
+    "web",
+    "public",
+    "url",
+    "cli"
+  ],
+  "author": "Diego Guerra <dgoguerra.or@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dgoguerra/git-public-url/issues"
+  },
+  "homepage": "https://github.com/dgoguerra/git-public-url#readme"
+}
