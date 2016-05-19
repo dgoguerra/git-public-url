@@ -4,8 +4,9 @@
   "description": "Obtain the public URL to a commit or file of a local repo",
   "dependencies": {
     "async": "^2.0.0-rc.5",
-    "minimist": "^1.2.0",
     "lodash": "^4.12.0",
+    "minimist": "^1.2.0",
+    "open": "0.0.5",
     "parse-repo": "^1.0.1"
   },
   "devDependencies": {

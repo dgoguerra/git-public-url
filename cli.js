@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 
-var minimist = require('minimist'),
+var open = require('open'),
+    minimist = require('minimist'),
     publicUrl = require('./index.js');
 
-var argv = minimist(process.argv.slice(2), {'--': true}),
+var argOpts = {'--': true, boolean: ['open'], alias: {open: ['o']}},
+    argv = minimist(process.argv.slice(2), argOpts),
     opts = {};
 
 var commitRef = null,
@@ -35,5 +37,9 @@ publicUrl(argv.dir || process.cwd(), opts, function(err, publicUrl) {
         return;
     }
 
-    console.log(publicUrl);
+    if (argv.open) {
+        open(publicUrl);
+    } else {
+        console.log(publicUrl);
+    }
 });
