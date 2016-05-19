@@ -30,5 +30,10 @@ if (argv.remote) {
 }
 
 publicUrl(argv.dir || process.cwd(), opts, function(err, publicUrl) {
+    if (err) {
+        console.error('error: '+err.message);
+        return;
+    }
+
     console.log(publicUrl);
 });

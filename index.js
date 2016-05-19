@@ -4,16 +4,32 @@ var _ = require('lodash'),
     spawn = require('child_process').spawn;
 
 function getRemoteUri(remoteName, next) {
+    var remoteUri = null;
+
     spawn('git', ['config', '--get', 'remote.'+remoteName+'.url'])
+        .on('close', function(code) {
+            if (code !== 0 || !remoteUri) {
+                return next(new Error("unknown remote '"+remoteName+"'"));
+            }
+            next(null, remoteUri);
+        })
         .stdout.on('data', function(data) {
-            next(null, data.toString().trim());
+            remoteUri = data.toString().trim();
         });
 }
 
 function getCommitHash(commitRef, next) {
-    spawn('git', ['rev-parse', commitRef])
+    var commitHash = null;
+
+    spawn('git', ['rev-parse', '--revs-only', commitRef])
+        .on('close', function(code) {
+            if (code !== 0 || !commitHash) {
+                return next(new Error("unknown commit revision '"+commitRef+"'"));
+            }
+            next(null, commitHash);
+        })
         .stdout.on('data', function(data) {
-            next(null, data.toString().trim());
+            commitHash = data.toString().trim();
         });
 }
 
@@ -57,6 +73,8 @@ function buildUrl(repoDir, opts, next) {
             getCommitHash(opts.commit || 'HEAD', next);
         }
     }, function(err, results) {
+        if (err) return next(err);
+
         var repo = parseRepo(results.remoteUri),
             commit = results.commitHash,
             file = opts.file || null,
