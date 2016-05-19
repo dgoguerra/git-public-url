@@ -28,6 +28,9 @@ https://github.com/dgoguerra/git-public-url/commit/40f327b9e81b8a0fefa7772a2c9ea
 # url to a file on the given commit
 $ git-public-url c177a45 -- package.json
 https://github.com/dgoguerra/git-public-url/blob/c177a45cad0e5692c2c5d9ea400a636b7692821c/package.json
+
+# open the url in a browser instead of printing it
+$ git-public-url --open
 ```
 
 ### License
