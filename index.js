@@ -71,6 +71,13 @@ function getRevisionHash(commitRev, next) {
     });
 }
 
+function fileExistsInRevision(commitRev, fileName, next) {
+    spawn('git', ['show', commitRev+':'+fileName], {stdio: 'ignore'})
+        .on('close', function(code) {
+            next(null, code === 0);
+        });
+}
+
 function buildBitbucketUrl(host, owner, project, commitHash, file) {
     var url = 'https://'+host+'/'+owner+'/'+project;
 
@@ -95,7 +102,23 @@ function buildGithubUrl(host, owner, project, commitHash, file) {
     return url;
 }
 
-function buildUrl(repoDir, opts, next) {
+function buildUrl(remoteUri, commitHash, fileName) {
+    var repo = parseRepo(remoteUri),
+        url = null;
+
+    if (repo.host === 'bitbucket.org') {
+        url = buildBitbucketUrl(repo.host, repo.owner, repo.project, commitHash, fileName);
+    }
+
+    if (repo.host === 'github.com') {
+        url = buildGithubUrl(repo.host, repo.owner, repo.project, commitHash, fileName);
+    }
+
+    return url;
+}
+
+
+function publicUrl(repoDir, opts, next) {
     if (typeof next === 'undefined') {
         next = opts;
         opts = {};
@@ -113,21 +136,27 @@ function buildUrl(repoDir, opts, next) {
     }, function(err, results) {
         if (err) return next(err);
 
-        var repo = parseRepo(results.remoteUri),
+        var remoteUri = results.remoteUri,
             commit = results.commitHash,
-            file = opts.file || null,
-            url = null;
+            fileName = opts.file || null;
 
-        if (repo.host === 'bitbucket.org') {
-            url = buildBitbucketUrl(repo.host, repo.owner, repo.project, commit, file);
+        // if there is a file path, ensure that it exists in the destination commit
+        if (fileName) {
+            fileExistsInRevision(commit, fileName, function(err, exists) {
+                if (err) return next(err);
+
+                if (!exists) {
+                    return next(new Error("file '"+fileName+"' doesn't exist in commit "+commit));
+                }
+
+                var url = buildUrl(remoteUri, commit, fileName);
+                next(null, url);
+            });
+        } else {
+            var url = buildUrl(remoteUri, commit, fileName);
+            next(null, url);
         }
-
-        if (repo.host === 'github.com') {
-            url = buildGithubUrl(repo.host, repo.owner, repo.project, commit, file);
-        }
-
-        next(null, url);
     });
 }
 
-module.exports = buildUrl;
+module.exports = publicUrl;
