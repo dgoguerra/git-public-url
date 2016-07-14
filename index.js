@@ -1,29 +1,8 @@
 var _ = require('lodash'),
     async = require('async'),
     parseRepo = require('parse-repo'),
+    commitHash = require('commit-hash'),
     spawn = require('child_process').spawn;
-
-function revisionIsTag(commitRev, next) {
-    spawn('git', ['describe', '--exact-match', commitRev])
-        .on('close', function(code) {
-            next(null, code === 0);
-        });
-}
-
-function getTagPointedCommit(tagName, next) {
-    var commitHash = null;
-
-    spawn('git', ['rev-list', '-n', '1', tagName])
-        .on('close', function(code) {
-            if (code !== 0 || !commitHash) {
-                return next(new Error("unknown tag '"+tagName+"'"));
-            }
-            next(null, commitHash);
-        })
-        .stdout.on('data', function(data) {
-            commitHash = data.toString().trim();
-        });
-}
 
 function getRemoteUri(remoteName, next) {
     var remoteUri = null;
@@ -38,37 +17,6 @@ function getRemoteUri(remoteName, next) {
         .stdout.on('data', function(data) {
             remoteUri = data.toString().trim();
         });
-}
-
-function getCommitHash(commitRev, next) {
-    var commitHash = null;
-
-    spawn('git', ['rev-parse', '--revs-only', commitRev])
-        .on('close', function(code) {
-            if (code !== 0 || !commitHash) {
-                return next(new Error("unknown commit revision '"+commitRev+"'"));
-            }
-            next(null, commitHash);
-        })
-        .stdout.on('data', function(data) {
-            commitHash = data.toString().trim();
-        });
-}
-
-function getRevisionHash(commitRev, next) {
-    var commitHash = null;
-
-    // first check if the given revision is a tag. If it is, then find
-    // the commit the tag is pointing to, instead of the tag's commit
-    revisionIsTag(commitRev, function(err, isTag) {
-        if (err) return next(err);
-
-        if (isTag) {
-            getTagPointedCommit(commitRev, next);
-        } else {
-            getCommitHash(commitRev, next);
-        }
-    });
 }
 
 function fileExistsInRevision(commitRev, fileName, next) {
@@ -131,7 +79,7 @@ function publicUrl(repoDir, opts, next) {
             getRemoteUri(opts.remote || 'origin', next);
         },
         commitHash: function(next) {
-            getRevisionHash(opts.commit || 'HEAD', next);
+            commitHash(opts.commit || 'HEAD', next);
         }
     }, function(err, results) {
         if (err) return next(err);
